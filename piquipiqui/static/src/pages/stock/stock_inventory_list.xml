@@ -1,0 +1,32 @@
+<t t-name="StockInventoryList">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Control de stock</h1>
+            <div class="header-actions">
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-elif="state.inventories.length === 0">
+                <div class="empty">Sin inventarios en curso</div>
+            </t>
+            <t t-else="">
+                <t t-foreach="state.inventories" t-as="inv" t-key="inv.id">
+                    <button class="picking-card" t-on-click="() => this.open(inv.id)">
+                        <div class="picking-card__header">
+                            <span class="picking-card__name" t-esc="inv.name"/>
+                        </div>
+                        <t t-if="inv.date">
+                            <div class="picking-card__date" t-esc="formatDate(inv.date)"/>
+                        </t>
+                    </button>
+                </t>
+            </t>
+        </div>
+    </div>
+</t>

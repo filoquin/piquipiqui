@@ -1,0 +1,9 @@
+<t t-name="RoadmapMap">
+    <div class="page page--map">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Mapa de ruta</h1>
+        </div>
+        <div class="map-container" t-ref="mapEl"/>
+    </div>
+</t>

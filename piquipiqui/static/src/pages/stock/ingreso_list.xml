@@ -1,0 +1,216 @@
+<t t-name="IngresoList">
+    <div class="page">
+
+        <!-- Cabecera -->
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Ingreso — <t t-esc="warehouse ? warehouse.name : ''"/></h1>
+            <div class="header-actions">
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <!-- Barra de filtros -->
+        <div class="filter-bar">
+            <button class="filter-btn" t-on-click="() => this.openPopup('origin')"
+                    t-att-class="state.filterOrigin ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-magnifying-glass"/>
+                <span>Origen</span>
+            </button>
+            <button class="filter-btn" t-on-click="() => this.openPopup('date')"
+                    t-att-class="state.filterDateFrom or state.filterDateTo ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-calendar-days"/>
+                <span>Fecha</span>
+            </button>
+            <button class="filter-btn" t-on-click="toggleShowDone"
+                    t-att-class="state.showDone ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-eye"/>
+                <span>Ver OK</span>
+            </button>
+            <button class="filter-btn" t-on-click="toggleIngresoOk"
+                    t-att-class="state.filterIngresoOk ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-circle-check"/>
+                <span>Ingreso OK</span>
+            </button>
+        </div>
+
+        <!-- Chips de filtros activos -->
+        <t t-if="hasActiveFilters">
+            <div class="filter-chips">
+                <t t-if="state.filterOrigin">
+                    <span class="chip">
+                        Origen: <strong t-esc="state.filterOrigin"/>
+                        <button t-on-click="clearOrigin">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterIngresoOk">
+                    <span class="chip">
+                        Ingreso OK
+                        <button t-on-click="toggleIngresoOk">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterPickingId">
+                    <span class="chip">
+                        <strong t-esc="state.filterPickingName"/>
+                        <button t-on-click="clearPicking">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterDateFrom or state.filterDateTo">
+                    <span class="chip">
+                        <t t-if="state.filterDateFrom">desde <strong t-esc="state.filterDateFrom"/></t>
+                        <t t-if="state.filterDateTo"> hasta <strong t-esc="state.filterDateTo"/></t>
+                        <button t-on-click="clearDate">×</button>
+                    </span>
+                </t>
+            </div>
+        </t>
+
+        <!-- Lista -->
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-elif="visibleMoves.length === 0">
+                <div class="empty">No hay movimientos pendientes.</div>
+            </t>
+            <t t-else="">
+                <t t-foreach="visibleMoves" t-as="move" t-key="move.id">
+                    <div class="move-item"
+                         t-att-class="move.quantity_done >= move.reserved_availability ? 'move-item move-item--done' : 'move-item'">
+                        <div class="move-item__qty" t-on-click="() => this.openModal(move.id)">
+                            <div t-att-class="move.quantity_done >= move.reserved_availability ? 'qty-badge qty-badge--ok' :
+                                              move.quantity_done > move.reserved_availability  ? 'qty-badge qty-badge--over' :
+                                                                                                 'qty-badge qty-badge--pending'">
+                                <span t-esc="move.quantity_done"/>
+                                <small>Scan</small>
+                            </div>
+                            <div class="qty-res">
+                                <span t-esc="move.reserved_availability"/>
+                                <small>Res</small>
+                            </div>
+                        </div>
+                        <div class="move-item__info">
+                            <div class="move-item__product" t-esc="move.product_id[1]"/>
+                            <div class="move-item__meta">
+                                <t t-if="move.picking_id">
+                                    <button class="link-btn"
+                                            t-on-click.stop="() => this.filterByPicking(move.picking_id[0], move.picking_id[1])"
+                                            t-esc="move.picking_id[1]"/>
+                                </t>
+                                <t t-if="move.origin"> · <span t-esc="move.origin"/></t>
+                            </div>
+                        </div>
+                        <button class="btn-icon btn-icon--dark" t-on-click="() => this.openModal(move.id)">
+                            <i class="fa-solid fa-list"/>
+                        </button>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </div>
+
+    <!-- Popup: filtro por origen -->
+    <t t-if="state.activePopup === 'origin'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por origen</h2></div>
+                <div class="modal-body">
+                    <input class="filter-input" type="text" placeholder="Ej: OC-00123"
+                           t-model="state.inputOrigin" autofocus="true"/>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearOrigin">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyOrigin">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Popup: filtro por fecha -->
+    <t t-if="state.activePopup === 'date'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por fecha</h2></div>
+                <div class="modal-body">
+                    <label class="filter-label">Desde
+                        <input class="filter-input" type="date" t-model="state.inputDateFrom"/>
+                    </label>
+                    <label class="filter-label">Hasta
+                        <input class="filter-input" type="date" t-model="state.inputDateTo"/>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearDate">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyDate">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Modal: detalle de movimiento -->
+    <t t-if="activeMove">
+        <div class="modal-overlay" t-on-click.self="closeModal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2 t-esc="activeMove.product_id[1]"/>
+                </div>
+                <div class="modal-body">
+                    <div t-att-class="activeMove.scanned_qty > 0 ? 'qty-display qty-display--active' : 'qty-display'">
+                        <span t-esc="activeMove.scanned_qty"/>
+                        <small>Escaneados</small>
+                    </div>
+                    <table class="detail-table">
+                        <tr t-if="activeMove.picking_id">
+                            <td>Remito</td>
+                            <td><strong t-esc="activeMove.picking_id[1]"/></td>
+                        </tr>
+                        <tr>
+                            <td>Unidad</td>
+                            <td><strong t-esc="activeMove.product_uom[1]"/></td>
+                        </tr>
+                        <tr>
+                            <td>Real / Reservado</td>
+                            <td>
+                                <strong t-esc="activeMove.quantity_done"/> /
+                                <strong t-esc="activeMove.reserved_availability"/>
+                            </td>
+                        </tr>
+                        <tr t-if="activeMove.origin">
+                            <td>Origen</td>
+                            <td><strong t-esc="activeMove.origin"/></td>
+                        </tr>
+                        <tr t-if="activeMove.barcode">
+                            <td>Código de barras</td>
+                            <td><strong t-esc="activeMove.barcode"/></td>
+                        </tr>
+                        <tr t-if="activeMove.default_code">
+                            <td>Código interno</td>
+                            <td><strong t-esc="activeMove.default_code"/></td>
+                        </tr>
+                    </table>
+                    <div class="qty-dir-toggle">
+                        <button t-on-click="() => state.qtyDir = -1"
+                                t-att-class="state.qtyDir === -1 ? 'active' : ''">−</button>
+                        <button t-on-click="() => state.qtyDir = 1"
+                                t-att-class="state.qtyDir === 1 ? 'active' : ''">+</button>
+                    </div>
+                    <div class="qty-buttons">
+                        <t t-foreach="[1, 5, 10, 50, 100]" t-as="n" t-key="n">
+                            <button class="qty-btn"
+                                    t-on-click="() => this._addQty(state.activeId, n * state.qtyDir)"
+                                    t-esc="n"/>
+                        </t>
+                    </div>
+                    <t t-if="activeMove.scanned_qty > 0 and activeMove.quantity_done !== activeMove.product_uom_qty">
+                        <button class="btn btn--success w-full" t-on-click="partialConfirm">
+                            Movimiento parcial
+                        </button>
+                    </t>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="closeModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>

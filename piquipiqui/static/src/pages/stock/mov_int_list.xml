@@ -1,0 +1,126 @@
+<t t-name="MovIntList">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Mov Internos</h1>
+            <div class="header-actions">
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <!-- Barra de filtros -->
+        <div class="filter-bar">
+            <button class="filter-btn" t-on-click="() => this.openPopup('origin')"
+                    t-att-class="state.filterOrigin ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-magnifying-glass"/>
+                <span>Origen</span>
+            </button>
+            <button class="filter-btn" t-on-click="() => this.openPopup('date')"
+                    t-att-class="state.filterDateFrom or state.filterDateTo ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-calendar-days"/>
+                <span>Fecha</span>
+            </button>
+        </div>
+
+        <!-- Chips de filtros activos -->
+        <t t-if="hasActiveFilters">
+            <div class="filter-chips">
+                <t t-if="state.filterOrigin">
+                    <span class="chip">
+                        Origen: <strong t-esc="state.filterOrigin"/>
+                        <button t-on-click="clearOrigin">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterDateFrom or state.filterDateTo">
+                    <span class="chip">
+                        <t t-if="state.filterDateFrom">desde <strong t-esc="state.filterDateFrom"/></t>
+                        <t t-if="state.filterDateTo"> hasta <strong t-esc="state.filterDateTo"/></t>
+                        <button t-on-click="clearDate">×</button>
+                    </span>
+                </t>
+            </div>
+        </t>
+
+        <!-- Lista -->
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-elif="state.pickings.length === 0">
+                <div class="empty">Sin pickings pendientes</div>
+            </t>
+            <t t-else="">
+                <t t-foreach="state.pickings" t-as="picking" t-key="picking.id">
+                    <button class="picking-card" t-on-click="() => this.open(picking.id)">
+                        <div class="picking-card__header">
+                            <span class="picking-card__name" t-esc="picking.display_name"/>
+                            <span t-attf-class="badge badge--{{picking.state}}" t-esc="picking.state"/>
+                        </div>
+                        <div class="picking-card__row">
+                            <span class="picking-card__label">Fecha</span>
+                            <span t-esc="formatDate(picking.scheduled_date)"/>
+                        </div>
+                        <div class="picking-card__row">
+                            <span class="picking-card__label">Destino</span>
+                            <span t-esc="picking.location_dest_id[1]"/>
+                        </div>
+                        <t t-if="picking.user_id">
+                            <div class="picking-card__row">
+                                <span class="picking-card__label">Responsable</span>
+                                <span t-esc="picking.user_id[1]"/>
+                            </div>
+                        </t>
+                        <t t-if="picking.origin">
+                            <div class="picking-card__row">
+                                <span class="picking-card__label">Origen</span>
+                                <span t-esc="picking.origin"/>
+                            </div>
+                        </t>
+                        <div class="picking-card__row">
+                            <span class="picking-card__label">A preparar</span>
+                            <span t-esc="picking.move_lines.length"/>
+                        </div>
+                    </button>
+                </t>
+            </t>
+        </div>
+    </div>
+
+    <!-- Popup: filtro por origen -->
+    <t t-if="state.activePopup === 'origin'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por origen</h2></div>
+                <div class="modal-body">
+                    <input class="filter-input" type="text" placeholder="Ej: OC-00123"
+                           t-model="state.inputOrigin" autofocus="true"/>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearOrigin">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyOrigin">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Popup: filtro por fecha -->
+    <t t-if="state.activePopup === 'date'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por fecha</h2></div>
+                <div class="modal-body">
+                    <label class="filter-label">Desde
+                        <input class="filter-input" type="date" t-model="state.inputDateFrom"/>
+                    </label>
+                    <label class="filter-label">Hasta
+                        <input class="filter-input" type="date" t-model="state.inputDateTo"/>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearDate">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyDate">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>

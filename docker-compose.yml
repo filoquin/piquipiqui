@@ -1,0 +1,21 @@
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./piquipiqui/static:/srv/piquipiqui/static:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=adhoc
+      - traefik.http.services.piquipiqui.loadbalancer.server.port=80
+      - traefik.http.routers.piquipiqui.service=piquipiqui
+      - traefik.http.routers.piquipiqui.entrypoints=web
+      - traefik.http.routers.piquipiqui.rule=Host(`piquipiqui.odoo.localhost`)
+    networks:
+      - adhoc
+    restart: unless-stopped
+
+networks:
+  adhoc:
+    name: adhoc
+    external: true

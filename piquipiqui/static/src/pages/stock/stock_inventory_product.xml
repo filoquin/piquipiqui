@@ -1,0 +1,90 @@
+<t t-name="StockInventoryProduct">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1 t-esc="state.location ? state.location.name : 'Productos'"/>
+            <div class="header-actions">
+                <button class="btn-icon" t-att-class="state.showOk ? 'btn-icon btn-icon--active' : 'btn-icon'"
+                        t-on-click="toggleShowOk" title="Mostrar completos">
+                    <i class="fa-solid fa-eye"/>
+                </button>
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-elif="state.lines.length === 0">
+                <div class="empty">Sin líneas de inventario</div>
+            </t>
+            <t t-else="">
+                <t t-foreach="visibleLines" t-as="line" t-key="line.id">
+                    <div class="move-item" t-on-click="() => this.openModal(line.id)">
+                        <div class="move-item__qty">
+                            <span t-attf-class="qty-badge #{line.product_qty >= line.theoretical_qty ? 'qty-badge--ok' : 'qty-badge--pending'}">
+                                <t t-esc="line.product_qty"/>
+                            </span>
+                            <span class="qty-res" t-esc="line.theoretical_qty"/>
+                        </div>
+                        <div class="move-item__info">
+                            <div class="move-item__product" t-esc="line.product_id[1]"/>
+                            <div class="move-item__meta" t-esc="line.product_uom_id[1]"/>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="visibleLines.length === 0">
+                    <div class="empty">Todo contabilizado</div>
+                </t>
+            </t>
+        </div>
+    </div>
+
+    <!-- Modal de línea -->
+    <t t-if="state.activeId !== null and activeLine">
+        <div class="modal-overlay" t-on-click.self="closeModal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2 t-esc="activeLine.product_id[1]"/>
+                </div>
+                <div class="modal-body">
+                    <div class="qty-display qty-display--active">
+                        <span t-esc="getScanned(activeLine.id)"/>
+                    </div>
+                    <table class="detail-table">
+                        <tr><td>Unidad</td><td t-esc="activeLine.product_uom_id[1]"/></tr>
+                        <tr><td>Contado</td><td t-esc="activeLine.product_qty"/></tr>
+                        <tr><td>Teórico</td><td t-esc="activeLine.theoretical_qty"/></tr>
+                        <t t-if="activeLine.barcode">
+                            <tr><td>Código de barra</td><td t-esc="activeLine.barcode"/></tr>
+                        </t>
+                        <t t-if="activeLine.default_code">
+                            <tr><td>Código interno</td><td t-esc="activeLine.default_code"/></tr>
+                        </t>
+                    </table>
+                    <div class="qty-dir-toggle">
+                        <button t-att-class="state.qtyDir === -1 ? 'qty-btn qty-btn--active' : 'qty-btn'"
+                                t-on-click="() => { this.state.qtyDir = -1; }">
+                            <i class="fa-solid fa-minus"/>
+                        </button>
+                        <button t-att-class="state.qtyDir === 1 ? 'qty-btn qty-btn--active' : 'qty-btn'"
+                                t-on-click="() => { this.state.qtyDir = 1; }">
+                            <i class="fa-solid fa-plus"/>
+                        </button>
+                    </div>
+                    <div class="qty-buttons">
+                        <button class="qty-btn" t-on-click="() => this.changeQty(1)">1</button>
+                        <button class="qty-btn" t-on-click="() => this.changeQty(5)">5</button>
+                        <button class="qty-btn" t-on-click="() => this.changeQty(10)">10</button>
+                        <button class="qty-btn" t-on-click="() => this.changeQty(50)">50</button>
+                        <button class="qty-btn" t-on-click="() => this.changeQty(100)">100</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--primary" t-on-click="closeModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>

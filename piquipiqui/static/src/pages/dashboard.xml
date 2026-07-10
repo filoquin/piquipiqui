@@ -1,0 +1,88 @@
+<t t-name="Dashboard">
+    <div class="page">
+        <div class="page-header page-header--dashboard">
+            <t t-if="supportsFullscreen">
+                <button class="dashboard-fs-btn" t-on-click="toggleFullscreen"
+                        t-att-title="state.fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'">
+                    <i t-att-class="state.fullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'"/>
+                </button>
+            </t>
+            <div class="dashboard-brand">
+                <svg class="dashboard-logo" viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- cola -->
+                    <ellipse cx="22" cy="72" rx="14" ry="5" fill="#c4007a" transform="rotate(-40 22 72)"/>
+                    <!-- cuerpo -->
+                    <ellipse cx="50" cy="64" rx="25" ry="21" fill="#EC008C"/>
+                    <!-- panza -->
+                    <ellipse cx="52" cy="68" rx="15" ry="13" fill="white" opacity="0.25"/>
+                    <!-- cabeza -->
+                    <circle cx="54" cy="37" r="19" fill="#EC008C"/>
+                    <!-- ala -->
+                    <ellipse cx="36" cy="65" rx="13" ry="7" fill="#c4007a" transform="rotate(-18 36 65)"/>
+                    <!-- ojo blanco -->
+                    <circle cx="61" cy="31" r="6" fill="white"/>
+                    <!-- pupila -->
+                    <circle cx="62" cy="31" r="3" fill="#222"/>
+                    <!-- brillo -->
+                    <circle cx="63" cy="29" r="1.2" fill="white"/>
+                    <!-- pico arriba -->
+                    <polygon points="70,38 90,28 70,43" fill="#ff8f00"/>
+                    <!-- pico abajo -->
+                    <polygon points="70,43 87,35 70,47" fill="#e65100"/>
+                    <!-- lombriz (serpentina) -->
+                    <path d="M 89 28 C 98 18, 105 26, 97 33 C 89 40, 96 50, 104 46"
+                          stroke="#66bb6a" stroke-width="4" fill="none"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- cabeza lombriz -->
+                    <circle cx="104" cy="46" r="5" fill="#66bb6a"/>
+                    <!-- ojo lombriz -->
+                    <circle cx="106" cy="44" r="1.5" fill="white"/>
+                    <circle cx="106" cy="44" r="0.7" fill="#222"/>
+                    <!-- patas -->
+                    <line x1="45" y1="83" x2="40" y2="95" stroke="#ff8f00" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="57" y1="84" x2="62" y2="95" stroke="#ff8f00" stroke-width="3" stroke-linecap="round"/>
+                    <!-- dedos izq -->
+                    <line x1="40" y1="95" x2="33" y2="99" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="40" y1="95" x2="40" y2="100" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="40" y1="95" x2="47" y2="99" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                    <!-- dedos der -->
+                    <line x1="62" y1="95" x2="55" y2="99" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="62" y1="95" x2="62" y2="100" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="62" y1="95" x2="69" y2="99" stroke="#ff8f00" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h1>PiquiPiqui</h1>
+            </div>
+        </div>
+        <div class="page-body menu-grid">
+            <button class="menu-tile" t-on-click="() => this.go('ingreso/wh-selector')">
+                <i class="fa-solid fa-warehouse menu-tile__icon"/>
+                <span class="menu-tile__label">Ingreso de mercadería</span>
+            </button>
+            <button class="menu-tile" t-on-click="() => this.go('stock/pickings/INT')">
+                <i class="fa-solid fa-arrows-rotate menu-tile__icon"/>
+                <span class="menu-tile__label">Mov Internos</span>
+            </button>
+            <button class="menu-tile" t-on-click="() => this.go('stock/pickings/PICK')">
+                <i class="fa-solid fa-cart-shopping menu-tile__icon"/>
+                <span class="menu-tile__label">Preparación de pedido</span>
+            </button>
+            <button class="menu-tile" t-on-click="() => this.go('stock/pickings/PACK')">
+                <i class="fa-solid fa-box-open menu-tile__icon"/>
+                <span class="menu-tile__label">Control de Carga</span>
+            </button>
+            <button class="menu-tile" t-on-click="() => this.go('ba/roadmap')">
+                <i class="fa-solid fa-truck menu-tile__icon"/>
+                <span class="menu-tile__label">Hoja de ruta</span>
+            </button>
+            <button class="menu-tile" t-on-click="() => this.go('stock/inventory')">
+                <i class="fa-solid fa-clipboard-list menu-tile__icon"/>
+                <span class="menu-tile__label">Control de stock</span>
+            </button>
+        </div>
+        <div class="dashboard-footer">
+            <button class="btn btn--secondary dashboard-logout" t-on-click="logout">
+                <i class="fa-solid fa-right-from-bracket"/> Salir
+            </button>
+        </div>
+    </div>
+</t>

@@ -1,0 +1,20 @@
+<t t-name="LocationPicker">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Ubicación de origen</h1>
+        </div>
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-else="">
+                <t t-foreach="state.locations" t-as="loc" t-key="loc.id">
+                    <button class="list-item" t-on-click="() => this.select(loc)">
+                        <span t-esc="loc.complete_name"/>
+                    </button>
+                </t>
+            </t>
+        </div>
+    </div>
+</t>

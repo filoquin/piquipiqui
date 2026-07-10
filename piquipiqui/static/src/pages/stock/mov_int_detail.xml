@@ -1,0 +1,232 @@
+<t t-name="MovIntDetail">
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1 t-esc="state.picking ? state.picking.display_name : '...'"/>
+            <div class="header-actions">
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-else="">
+
+                <!-- ══ PASO 1: ELEGIR UBICACIÓN ORIGEN ══ -->
+                <t t-if="state.step === 'locations'">
+                    <t t-if="pendingSourceLocs.length === 0">
+                        <div class="empty">Sin ubicaciones pendientes</div>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="pendingSourceLocs" t-as="loc" t-key="loc.id">
+                            <button class="picking-card picking-card--clickable"
+                                    t-on-click="() => this.selectLocation(loc.id)">
+                                <div class="picking-card__header">
+                                    <span class="picking-card__name" t-esc="loc.name"/>
+                                    <i class="fa-solid fa-chevron-right"/>
+                                </div>
+                            </button>
+                        </t>
+                    </t>
+
+                    <!-- Validar desde ubicaciones -->
+                    <div style="padding:16px 0">
+                        <button class="btn btn--primary w-full"
+                                t-on-click="validate"
+                                t-att-disabled="state.saving">
+                            <t t-if="state.saving">Guardando...</t>
+                            <t t-else="">Validar picking</t>
+                        </button>
+                    </div>
+                </t>
+
+                <!-- ══ PASO 2: PRODUCTOS DE LA UBICACIÓN ══ -->
+                <t t-if="state.step === 'products'">
+                    <t t-if="srcLines.length === 0">
+                        <div class="empty">Sin productos pendientes en esta ubicación</div>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="srcLines" t-as="line" t-key="line.id">
+                            <div t-att-class="(line.qty_done + line.scanned_qty) >= line.product_uom_qty
+                                              ? 'move-item move-item--done' : 'move-item'">
+                                <div class="move-item__qty" t-on-click="() => this.openModal(line.id)">
+                                    <div t-att-class="(line.qty_done + line.scanned_qty) >= line.product_uom_qty
+                                                      ? 'qty-badge qty-badge--ok' : 'qty-badge qty-badge--pending'">
+                                        <span t-esc="line.qty_done + line.scanned_qty"/>
+                                        <small>Scan</small>
+                                    </div>
+                                    <div class="qty-res">
+                                        <span t-esc="line.product_uom_qty"/>
+                                        <small>Dem</small>
+                                    </div>
+                                </div>
+                                <div class="move-item__info">
+                                    <div class="move-item__product" t-esc="line.product_id[1]"/>
+                                    <div class="move-item__meta">
+                                        <span t-esc="line.product_uom_id[1]"/>
+                                        · <span t-esc="line.location_dest_id[1]"/>
+                                    </div>
+                                </div>
+                                <button class="btn-icon btn-icon--dark" t-on-click="() => this.openModal(line.id)">
+                                    <i class="fa-solid fa-list"/>
+                                </button>
+                            </div>
+                        </t>
+                    </t>
+
+                    <!-- Barra inferior paso 2 -->
+                    <div class="step-actions">
+                        <button class="btn btn--secondary" t-on-click="goLocations">
+                            <i class="fa-solid fa-arrow-left"/> Ubicaciones
+                        </button>
+                        <button class="btn btn--primary" t-on-click="goLeave"
+                                t-att-disabled="!hasScanned">
+                            Dejar <i class="fa-solid fa-arrow-right"/>
+                        </button>
+                    </div>
+                </t>
+
+                <!-- ══ PASO 3: DEJAR EN DESTINO ══ -->
+                <t t-if="state.step === 'leave'">
+
+                    <!-- Selector de destino global -->
+                    <button t-att-class="state.targetLocId ? 'dest-target dest-target--set' : 'dest-target'"
+                            t-on-click="openLocPicker">
+                        <i class="fa-solid fa-location-dot"/>
+                        <span t-esc="state.targetLocName || 'Escanee o elija un destino'"/>
+                        <i class="fa-solid fa-pen fa-xs"/>
+                    </button>
+
+                    <t t-if="pendingLeaveLines.length === 0">
+                        <div class="empty">Sin productos escaneados para dejar</div>
+                    </t>
+                    <t t-else="">
+                        <div class="dest-group">
+                            <t t-foreach="pendingLeaveLines" t-as="line" t-key="line.id">
+                                <div class="dest-line">
+                                    <div t-att-class="line.ignore_move ? 'dest-line__qty dest-line__qty--ignored' : 'dest-line__qty'">
+                                        <span t-esc="line.scanned_qty"/>
+                                    </div>
+                                    <div class="dest-line__name" t-esc="line.product_id[1]"/>
+                                    <button class="btn-icon btn-icon--dark"
+                                            t-on-click="() => { line.ignore_move = !line.ignore_move; }"
+                                            t-att-title="line.ignore_move ? 'Incluir' : 'Ignorar'">
+                                        <i t-att-class="line.ignore_move ? 'fa-solid fa-rotate-left' : 'fa-solid fa-xmark'"/>
+                                    </button>
+                                </div>
+                            </t>
+                            <button class="btn btn--secondary dest-group__scan-btn"
+                                    t-on-click="_commitDest"
+                                    t-att-disabled="state.saving or !state.targetLocId">
+                                <i class="fa-solid fa-check"/> Confirmar depósito
+                            </button>
+                        </div>
+                    </t>
+
+                    <!-- Barra inferior paso 3 -->
+                    <div class="step-actions">
+                        <button class="btn btn--secondary" t-on-click="() => { state.step = 'products'; }">
+                            <i class="fa-solid fa-arrow-left"/> Productos
+                        </button>
+                        <button class="btn btn--primary" t-on-click="validate"
+                                t-att-disabled="state.saving">
+                            <t t-if="state.saving">Guardando...</t>
+                            <t t-else="">Validar</t>
+                        </button>
+                    </div>
+                </t>
+
+            </t>
+        </div>
+    </div>
+
+    <!-- ══ MODAL SELECTOR DE SUB-UBICACIÓN (paso dejar) ══ -->
+    <t t-if="state.showLocPicker">
+        <div class="modal-overlay" t-on-click.self="closeLocPicker">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2>Elegir destino</h2>
+                </div>
+                <div class="modal-body" style="padding:0;max-height:60vh;overflow-y:auto">
+                    <t t-foreach="state.subLocs" t-as="loc" t-key="loc.id">
+                        <button t-att-class="loc.id === state.targetLocId
+                                             ? 'subloc-item subloc-item--active'
+                                             : 'subloc-item'"
+                                t-on-click="() => this.pickSubLoc(loc)">
+                            <i class="fa-solid fa-location-dot"/>
+                            <span t-esc="loc.name"/>
+                            <i t-if="loc.id === state.targetLocId" class="fa-solid fa-check"/>
+                        </button>
+                    </t>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="closeLocPicker">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- ══ MODAL DE LÍNEA (pasos 1 y 2) ══ -->
+    <t t-if="activeMove">
+        <div class="modal-overlay" t-on-click.self="closeModal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2 t-esc="activeMove.product_id[1]"/>
+                </div>
+                <div class="modal-body">
+                    <div t-att-class="activeMove.scanned_qty > 0 ? 'qty-display qty-display--active' : 'qty-display'">
+                        <span t-esc="activeMove.scanned_qty"/>
+                        <small>Escaneados</small>
+                    </div>
+                    <table class="detail-table">
+                        <tr>
+                            <td>Unidad</td>
+                            <td><strong t-esc="activeMove.product_uom_id[1]"/></td>
+                        </tr>
+                        <tr>
+                            <td>Hecho / Demanda</td>
+                            <td>
+                                <strong t-esc="activeMove.qty_done + activeMove.scanned_qty"/>
+                                / <strong t-esc="activeMove.product_uom_qty"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Origen</td>
+                            <td><strong t-esc="activeMove.location_id[1]"/></td>
+                        </tr>
+                        <tr>
+                            <td>Destino</td>
+                            <td><strong t-esc="activeMove.location_dest_id[1]"/></td>
+                        </tr>
+                        <t t-if="activeMove.barcode">
+                            <tr><td>Código de barras</td><td><strong t-esc="activeMove.barcode"/></td></tr>
+                        </t>
+                        <t t-if="activeMove.default_code">
+                            <tr><td>Código interno</td><td><strong t-esc="activeMove.default_code"/></td></tr>
+                        </t>
+                    </table>
+                    <div class="qty-dir-toggle">
+                        <button t-on-click="() => state.qtyDir = -1"
+                                t-att-class="state.qtyDir === -1 ? 'active' : ''">−</button>
+                        <button t-on-click="() => state.qtyDir = 1"
+                                t-att-class="state.qtyDir === 1 ? 'active' : ''">+</button>
+                    </div>
+                    <div class="qty-buttons">
+                        <t t-foreach="[1, 5, 10, 50, 100]" t-as="n" t-key="n">
+                            <button class="qty-btn"
+                                    t-on-click="() => this._addQty(state.activeId, n * state.qtyDir)"
+                                    t-esc="n"/>
+                        </t>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="closeModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>

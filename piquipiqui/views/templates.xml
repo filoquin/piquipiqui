@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="piquipiqui_index" name="PiquiPiqui">
+        <html>
+            <head>
+                <meta charset="UTF-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+                <title>PiquiPiqui</title>
+                <link rel="manifest" href="/piquipiqui/static/manifest.json"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+                <meta name="apple-mobile-web-app-title" content="PiquiPiqui"/>
+                <meta name="theme-color" content="#EC008C"/>
+                <link rel="stylesheet" href="/piquipiqui/static/lib/fontawesome/css/fontawesome.min.css"/>
+                <link rel="stylesheet" href="/piquipiqui/static/lib/fontawesome/css/solid.min.css"/>
+                <link rel="stylesheet" href="/piquipiqui/static/src/css/app.css"/>
+            </head>
+            <body>
+                <div id="app"/>
+                <!-- OWL 2.x IIFE → expone window.owl -->
+                <script src="/piquipiqui/static/lib/owl/dist/owl.iife.js"/>
+                <!-- session_info de Odoo disponible para la app -->
+                <script>
+                    window.__SESSION__ = <t t-out="json.dumps(session_info)"/>;
+                </script>
+                <script type="module" src="/piquipiqui/static/src/app.js"/>
+            </body>
+        </html>
+    </template>
+</odoo>

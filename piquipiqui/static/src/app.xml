@@ -1,0 +1,6 @@
+<t t-name="WHM2App">
+    <div class="piquipiqui">
+        <Alert/>
+        <t t-component="currentComponent" t-key="state.path" t-props="state.params"/>
+    </div>
+</t>

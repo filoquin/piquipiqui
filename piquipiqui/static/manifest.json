@@ -1,0 +1,9 @@
+{
+  "name": "PiquiPiqui",
+  "short_name": "PiquiPiqui",
+  "start_url": "/piquipiqui/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#EC008C",
+  "orientation": "portrait"
+}

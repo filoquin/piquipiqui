@@ -1,0 +1,21 @@
+<t t-name="WhSelector">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Seleccionar almacén</h1>
+        </div>
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-else="">
+                <t t-foreach="state.warehouses" t-as="wh" t-key="wh.id">
+                    <button class="list-item" t-on-click="() => this.select(wh)">
+                        <i class="fa-solid fa-warehouse"/>
+                        <span t-esc="wh.name"/>
+                    </button>
+                </t>
+            </t>
+        </div>
+    </div>
+</t>

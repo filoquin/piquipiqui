@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>PiquiPiqui</title>
+    <link rel="manifest" href="/piquipiqui/static/manifest.json"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-title" content="PiquiPiqui"/>
+    <meta name="theme-color" content="#EC008C"/>
+    <link rel="stylesheet" href="/piquipiqui/static/lib/fontawesome/css/fontawesome.min.css"/>
+    <link rel="stylesheet" href="/piquipiqui/static/lib/fontawesome/css/solid.min.css"/>
+    <link rel="stylesheet" href="/piquipiqui/static/src/css/app.css"/>
+</head>
+<body>
+    <div id="app"></div>
+    <!-- OWL 2.x -->
+    <script src="/piquipiqui/static/lib/owl/dist/owl.iife.js"></script>
+    <!-- En dev no hay QWeb, la sesión viene vacía; el RpcService usa la cookie de Odoo -->
+    <script>window.__SESSION__ = {};</script>
+    <script type="module" src="/piquipiqui/static/src/app.js"></script>
+</body>
+</html>

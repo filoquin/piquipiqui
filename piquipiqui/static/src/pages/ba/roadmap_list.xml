@@ -1,0 +1,149 @@
+<t t-name="RoadmapList">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1>Hoja de ruta</h1>
+            <div class="header-actions">
+                <button class="btn-icon" t-on-click="refresh"><i class="fa-solid fa-rotate-right"/></button>
+            </div>
+        </div>
+
+        <!-- Barra de filtros -->
+        <div class="filter-bar">
+            <button class="filter-btn" t-on-click="() => this.openPopup('nombre')"
+                    t-att-class="state.filterName ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-hashtag"/>
+                <span>Nro hoja</span>
+            </button>
+            <button class="filter-btn" t-on-click="() => this.openPopup('vehicle')"
+                    t-att-class="state.filterVehicle ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-truck"/>
+                <span>Vehículo</span>
+            </button>
+            <button class="filter-btn" t-on-click="() => this.openPopup('date')"
+                    t-att-class="state.filterDateFrom or state.filterDateTo ? 'filter-btn filter-btn--active' : 'filter-btn'">
+                <i class="fa-solid fa-calendar-days"/>
+                <span>Fecha</span>
+            </button>
+        </div>
+
+        <!-- Chips de filtros activos -->
+        <t t-if="hasActiveFilters">
+            <div class="filter-chips">
+                <t t-if="state.filterName">
+                    <span class="chip">
+                        Hoja: <strong t-esc="state.filterName"/>
+                        <button t-on-click="clearNombre">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterVehicle">
+                    <span class="chip">
+                        Vehículo: <strong t-esc="state.filterVehicle"/>
+                        <button t-on-click="clearVehicle">×</button>
+                    </span>
+                </t>
+                <t t-if="state.filterDateFrom or state.filterDateTo">
+                    <span class="chip">
+                        <t t-if="state.filterDateFrom">desde <strong t-esc="state.filterDateFrom"/></t>
+                        <t t-if="state.filterDateTo"> hasta <strong t-esc="state.filterDateTo"/></t>
+                        <button t-on-click="clearDate">×</button>
+                    </span>
+                </t>
+            </div>
+        </t>
+
+        <!-- Lista -->
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-elif="state.roadmaps.length === 0">
+                <div class="empty">Sin rutas disponibles</div>
+            </t>
+            <t t-else="">
+                <t t-foreach="state.roadmaps" t-as="rm" t-key="rm.id">
+                    <button class="picking-card" t-on-click="() => this.open(rm.id)">
+                        <div class="picking-card__header">
+                            <span class="picking-card__name" t-esc="rm.display_name"/>
+                            <span t-attf-class="badge badge--{{rm.state}}" t-esc="rm.state"/>
+                        </div>
+                        <t t-if="rm.preparation_date">
+                            <div class="picking-card__date" t-esc="formatDate(rm.preparation_date)"/>
+                        </t>
+                        <t t-if="rm.driver_user_id">
+                            <div class="picking-card__row">
+                                <span class="picking-card__label">Conductor</span>
+                                <span t-esc="rm.driver_user_id[1]"/>
+                            </div>
+                        </t>
+                        <t t-if="rm.vehicle_id">
+                            <div class="picking-card__row">
+                                <span class="picking-card__label">Vehículo</span>
+                                <span t-esc="rm.vehicle_id[1]"/>
+                            </div>
+                        </t>
+                        <div class="picking-card__row">
+                            <span class="picking-card__label">Remitos</span>
+                            <span t-esc="rm.picking_ids.length"/>
+                        </div>
+                    </button>
+                </t>
+            </t>
+        </div>
+    </div>
+
+    <!-- Popup: filtro por número de hoja -->
+    <t t-if="state.activePopup === 'nombre'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por nro de hoja</h2></div>
+                <div class="modal-body">
+                    <input class="filter-input" type="text" placeholder="Ej: HR/00861"
+                           t-model="state.inputName" autofocus="true"/>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearNombre">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyNombre">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Popup: filtro por vehículo -->
+    <t t-if="state.activePopup === 'vehicle'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por vehículo</h2></div>
+                <div class="modal-body">
+                    <input class="filter-input" type="text" placeholder="Ej: DUCATO"
+                           t-model="state.inputVehicle" autofocus="true"/>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearVehicle">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyVehicle">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Popup: filtro por fecha -->
+    <t t-if="state.activePopup === 'date'">
+        <div class="modal-overlay" t-on-click.self="closePopup">
+            <div class="modal-box">
+                <div class="modal-header"><h2>Filtrar por fecha</h2></div>
+                <div class="modal-body">
+                    <label class="filter-label">Desde
+                        <input class="filter-input" type="date" t-model="state.inputDateFrom"/>
+                    </label>
+                    <label class="filter-label">Hasta
+                        <input class="filter-input" type="date" t-model="state.inputDateTo"/>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn--secondary" t-on-click="clearDate">Limpiar</button>
+                    <button class="btn btn--primary" t-on-click="applyDate">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</t>

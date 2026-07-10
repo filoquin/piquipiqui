@@ -1,0 +1,48 @@
+<t t-name="RoadmapTurn">
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" t-on-click="back">←</button>
+            <h1 t-esc="state.turn ? state.turn.partner_id[1] : '...'"/>
+        </div>
+        <div class="page-body">
+            <t t-if="state.loading">
+                <div class="loading"><div class="spinner"/><span>Cargando...</span></div>
+            </t>
+            <t t-else="">
+                <div class="detail-summary">
+                    <div class="detail-row">
+                        <span class="detail-label">Estado</span>
+                        <span t-attf-class="badge badge--{{state.turn.state}}"
+                              t-esc="state.turn.state"/>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Turno</span>
+                        <span t-esc="state.turn.schedule_id ? state.turn.schedule_id[1] : '-'"/>
+                    </div>
+                </div>
+
+                <div class="lines-section">
+                    <h2>Pickings</h2>
+                    <t t-foreach="state.pickings" t-as="picking" t-key="picking.id">
+                        <div class="line-row">
+                            <span t-esc="picking.name"/>
+                            <span t-attf-class="badge badge--{{picking.state}}"
+                                  t-esc="picking.state"/>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="actions">
+                    <t t-if="state.turn.state !== 'received'">
+                        <button class="btn btn--primary"
+                                t-on-click="validate"
+                                t-att-disabled="state.saving">
+                            <t t-if="state.saving">Guardando...</t>
+                            <t t-else="">Marcar entregado</t>
+                        </button>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
